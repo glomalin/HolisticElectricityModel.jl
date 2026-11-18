@@ -1,12 +1,12 @@
 # HolisticElectricityModel.jl
-[![Documentation](https://img.shields.io/badge/docs-ready-blue.svg)](https://nrel-hem.github.io/HolisticElectricityModel.jl/)
+[![Documentation](https://img.shields.io/badge/docs-ready-blue.svg)](https://glomalin.github.io/HolisticElectricityModel.jl/)
 
 The Holistic Electricity Model (HEM) is a computational framework for analyzing electricity systems in their entirety, from the points of view of all key stakeholders.
 
 ## Start-Up Instructions
 
 - Clone this repository
-- Prepare the model input data by cloning the [HolisticElectricityModelData.jl repository](https://github.nrel.gov/HEM/HolisticElectricityModelData.jl) and following the instructions. (Users can also generate their own input data as long as it is in a compatible format.)
+- Prepare the model input data by cloning the [HolisticElectricityModelData.jl repository](https://https://github.com/glomalin/HolisticElectricityModelData.jl) and following the instructions. (Users can also generate their own input data as long as it is in a compatible format.)
 
 
 ### Installation
