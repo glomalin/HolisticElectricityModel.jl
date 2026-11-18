@@ -19,7 +19,7 @@ In limited cases, mappings between two or three indices must also be provided. M
 
  - **index_h.csv**: Customer groups. Example values are `Residential, Commercial, Industrial`, but this index can also be used to differentiate customer data more finely.
 
- - **index_z.csv**: Balancing areas (BAs) / utility zones. [HEMData.jl](https://github.com/nrel-hem/HolisticElectricityModelData.jl) provides data parsing tied to the [ReEDS BAs]((https://www.nrel.gov/analysis/assets/pdfs/reeds-model-regions-map.pdf).
+ - **index_z.csv**: Balancing areas (BAs) / utility zones. [HEMData.jl](https://github.com/glomalin/HolisticElectricityModelData.jl) provides data parsing tied to the [ReEDS BAs]((https://www.nlr.gov/analysis/assets/pdfs/reeds-model-regions-map.pdf).
 
  - **index_sector.csv**: High-level customer groups used to establish classes for rate-making. Example values are `Residential, Commercial, Industrial`.
 
