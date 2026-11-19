@@ -35,10 +35,14 @@ struct HEMOptions{
 end
 
 function get_file_prefix(options::HEMOptions)
-    return join([# "$(typeof(options.der_use_case))", 
-            # "$(typeof(options.supply_choice_use_case))",
-            "$(typeof(options.der_aggregation_use_case))",
-            "$(typeof(options.market_structure))"], "_")
+    parts = ["$(typeof(options.market_structure))"]
+    if !(options.der_aggregation_use_case isa NullUseCase)
+        push!(parts, "$(typeof(options.der_aggregation_use_case))")
+    end
+    if !(options.supply_choice_use_case isa NullUseCase)
+        push!(parts, "$(typeof(options.supply_choice_use_case))")
+    end
+    return join(parts, "_")
 end
 
 
