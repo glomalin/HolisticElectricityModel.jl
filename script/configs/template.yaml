@@ -23,6 +23,11 @@ RunOptions:
   # Specify the output directory for the results. This is optional; if not specified, results will be saved in a newly created directory
   # under the input path with a name based on the configuration.
   output_dir: "Results/"
+  # Optional last simulation year to solve (must be one of the simulation years in the input data).
+  # Useful for quick test or benchmark runs. Results for years <= end_year are computed the same way as in a full run;
+  # later years are left at their initial values. The results directory name (default or output_dir)
+  # gets a "_thru<end_year>" suffix. If not specified, all years are solved.
+  # end_year: 2023
 
 # ------------------------------------------------------------------------------
 # Simulation Parameters
@@ -31,6 +36,10 @@ RunOptions:
 SimulationParameters:
   # CHOOSE ONE
   solver: "Xpress" # "Gurobi"
+  # Optional number of solver threads (Gurobi only). Set this to the number of CPUs allocated
+  # to the job (e.g. sbatch -n 10 -> 10) so that results do not depend on the node's core count.
+  # If not specified, the solver's default is used.
+  # solver_threads: 10
 
 # ------------------------------------------------------------------------------
 # Holistic Energy Model (HEM) model-wide options

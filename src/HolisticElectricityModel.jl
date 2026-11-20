@@ -91,6 +91,7 @@ export read_saved_result
 # Solvers
 export import_solver_package
 export get_optimizer_for_solver
+export set_solver_threads!
 export get_new_jump_model
 export addsolvers_ipp!
 
@@ -141,6 +142,8 @@ include("agents/common.jl")
 include("agents/regulator.jl")
 include("agents/utility.jl")
 include("agents/customer_group.jl")
+include("agents/customer_group_der_adoption.jl")
+include("agents/customer_group_supply_choice.jl")
 include("agents/ipp_group.jl")
 include("agents/green_developer.jl")
 include("agents/der_aggregator.jl")

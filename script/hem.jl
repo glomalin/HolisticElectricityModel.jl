@@ -32,7 +32,8 @@ input_dir, year_start, delta_t = parse(
 
 
 # configure solver
-solver, = parse(config, "SimulationParameters", validators)
+solver, solver_threads = parse(config, "SimulationParameters", validators)
+set_solver_threads!(solver_threads)
 @info "Running on environment $(splitpath(Base.active_project())[end-1]) with solver $(solver)"
 import_solver_package(solver)
 
@@ -45,7 +46,7 @@ import_solver_package(solver)
 market_structure, der_use_case, supply_choice_use_case,
 der_aggregation_use_case = parse(config, "HEMOptions", validators)
 
-output_dir, = "RunOptions" in keys(config) ? parse(config, "RunOptions", validators) : (nothing,)
+output_dir, end_year = "RunOptions" in keys(config) ? parse(config, "RunOptions", validators) : (nothing, nothing)
 
 hem_opts = HEMOptions(
     market_structure,
@@ -67,7 +68,8 @@ resolved_output_dir = run_hem(
     agent_options,
     force=true,
     jump_model=jump_model,
-    output_dir=output_dir
+    output_dir=output_dir,
+    end_year=end_year,
 )
 
 save_config(
@@ -75,6 +77,8 @@ save_config(
     input_dir,
     hem_opts,
     agent_options,
-    resolved_output_dir
+    resolved_output_dir;
+    end_year=end_year,
+    solver_threads=solver_threads,
 )
 # ------------------------------------------------------------------------------

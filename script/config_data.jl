@@ -76,6 +76,11 @@ validators = Dict(
             value -> check_string(value),
             nothing
         ),
+        FieldValidatorHasDefault(
+            "end_year",
+            value -> check_integer(value),
+            nothing
+        ),
     ],      
     "SimulationParameters" => [
         FieldValidatorBasic(
@@ -84,6 +89,11 @@ validators = Dict(
                 val -> check_in_collection(val, ("Gurobi", "Xpress")),
                 check_symbol
             ])
+        ),
+        FieldValidatorHasDefault(
+            "solver_threads",
+            value -> check_integer(value; min=1),
+            nothing
         ),
     ],
     "HEMOptions" => [

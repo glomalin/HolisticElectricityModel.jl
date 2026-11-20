@@ -221,14 +221,48 @@ function _get_gurobi()
     end
 end
 
+"""
+Gurobi parameters applied to every Gurobi optimizer HEM creates. Parameters set explicitly
+for a particular model (e.g. via `JuMP.optimizer_with_attributes` in `addsolvers_ipp!`) are
+applied afterwards and take precedence.
+
+- `Method = 4` (deterministic concurrent): Gurobi's default for LPs is non-deterministic
+  concurrent (`Method = 3`), a race between simplex and barrier whose winner, and hence the
+  optimal basis returned for degenerate problems, can change from run to run. That made
+  identical HEM runs give different prices and downstream results.
+- `Threads`: set with `set_solver_threads!` (e.g. from `SimulationParameters.solver_threads`)
+  so runs use the same thread count regardless of how many cores the node has.
+
+See https://docs.gurobi.com/projects/optimizer/en/11.0/features/concurrent.html#determinism
+"""
+const GUROBI_PARAMS = Dict{String, Any}("Method" => 4)
+
+"""
+Fix the number of solver threads for all subsequently created optimizers (currently applied
+to Gurobi only). Pass `nothing` to use the solver's default.
+"""
+function set_solver_threads!(threads::Union{Integer, Nothing})
+    if isnothing(threads)
+        delete!(GUROBI_PARAMS, "Threads")
+    else
+        threads >= 1 || error("threads must be >= 1, got $threads")
+        GUROBI_PARAMS["Threads"] = Int(threads)
+    end
+    return
+end
+
 function _initialize_optimizer_gurobi()
-    @eval Main begin
+    optimizer = @eval Main begin
         import Gurobi
         if !(@isdefined GUROBI_ENV)
             const global GUROBI_ENV = Gurobi.Env()
         end
-        return Gurobi.Optimizer(GUROBI_ENV)
+        Gurobi.Optimizer(GUROBI_ENV)
     end
+    for (name, value) in GUROBI_PARAMS
+        MOI.set(optimizer, MOI.RawOptimizerAttribute(name), value)
+    end
+    return optimizer
 end
 
 function addsolvers_ipp!(ipp_solvers::Dict,solver_name::Val{:Gurobi})

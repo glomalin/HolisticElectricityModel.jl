@@ -54,13 +54,13 @@ function check_iterable(value, min_length, func)
 end
 
 function check_integer(value; min=nothing, max=nothing)
-    result = value isa String ? parse(Int, value) : Int(value)
+    result = value isa String ? Base.parse(Int, value) : Int(value)
 
     return _check_bounds(result; min=min, max=max)
 end
 
 function check_float(value; min=nothing, max=nothing)
-    result = value isa String ? parse(Float64, value) : Float64(value)
+    result = value isa String ? Base.parse(Float64, value) : Float64(value)
 
     return _check_bounds(result; min=min, max=max)
 end
@@ -198,13 +198,21 @@ function save_config(
     input_path::AbstractString,
     options::HEMOptions,
     agent_options::AgentOptionsStore,
-    output_dir::AbstractString,
+    output_dir::AbstractString;
+    end_year::Union{Int, Nothing} = nothing,
+    solver_threads::Union{Int, Nothing} = nothing,
 )
     config_file = joinpath(output_dir, "config.yaml")
     run_config = Dict{Any, Any}()
     run_config["DataSelection"] = Dict("input_path" => input_path)
-    run_config["RunOptions"] = Dict("output_dir" => output_dir)
-    run_config["SimulationParameters"] = Dict("solver" => "$(solver)")
+    run_config["RunOptions"] = Dict{String, Any}("output_dir" => output_dir)
+    if !isnothing(end_year)
+        run_config["RunOptions"]["end_year"] = end_year
+    end
+    run_config["SimulationParameters"] = Dict{String, Any}("solver" => "$(solver)")
+    if !isnothing(solver_threads)
+        run_config["SimulationParameters"]["solver_threads"] = solver_threads
+    end
     run_config["$(nameof(typeof(options)))"] = _get_dict_from_options(options)
     for (agent_type, agent_opts) in agent_options.data
         run_config["$(agent_type)"] = _get_dict_from_options(agent_opts)

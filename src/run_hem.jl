@@ -70,6 +70,50 @@ function create_agents_and_opts(input_dir::AbstractString, model_data::HEMData, 
 end
 
 """
+Return the simulation years (as `Int`s) over the full horizon `model_data.index_y_fix`.
+"""
+get_simulation_years(model_data::HEMData) =
+    [Int(model_data.year(y)) for y in model_data.index_y_fix.elements]
+
+"""
+Check a requested `end_year` against the simulation years and return the value to use.
+
+- `nothing` -> `nothing` (solve all years)
+- `end_year` at or after the last simulation year -> `nothing`, with a log message
+  (`@info` if equal, `@warn` if after)
+- `end_year` one of the other simulation years -> `end_year`
+- otherwise (before the first year, or not a simulation year) -> error
+"""
+resolve_end_year(end_year::Nothing, sim_years::AbstractVector{<:Integer}) = nothing
+
+function resolve_end_year(end_year::Integer, sim_years::AbstractVector{<:Integer})
+    last_year = last(sim_years)
+    if end_year == last_year
+        @info "end_year = $end_year is the last simulation year; running all years without truncation."
+        return nothing
+    elseif end_year > last_year
+        @warn "end_year = $end_year is after the last simulation year ($last_year); running all years without truncation."
+        return nothing
+    elseif !(end_year in sim_years)
+        error("end_year = $end_year is not one of the simulation years $(sim_years)")
+    end
+    return Int(end_year)
+end
+
+resolve_end_year(end_year, model_data::HEMData) =
+    resolve_end_year(end_year, get_simulation_years(model_data))
+
+"""
+Return the results directory for a run truncated at `end_year`: `output_dir` with a
+`_thru<end_year>` suffix, or `output_dir` unchanged if `end_year` is `nothing`. Trailing
+path separators are stripped first, so `"Results/"` becomes `"Results_thru2023"` rather
+than a subdirectory.
+"""
+end_year_output_dir(output_dir::AbstractString, ::Nothing) = output_dir
+end_year_output_dir(output_dir::AbstractString, end_year::Integer) =
+    rstrip(output_dir, ['/', '\\']) * "_thru$(end_year)"
+
+"""
 Solve the problem with the given inputs.
 
 # Arguments
@@ -87,6 +131,12 @@ Solve the problem with the given inputs.
   `input_dir` with a prefix based on the options and agents.
 - `delta_t::Int`: Number of hours per representative hour. Defaults to 4.
 - `year_start::Int`: The base year for the simulation. Defaults to 2020.
+- `end_year::Union{Int, Nothing}`: Last simulation year to solve. If set, the run stops after
+  the window starting in `end_year` (results for later years are initial values only) and
+  the output directory name (default or user-specified) gets a `_thru<end_year>` suffix. If
+  `end_year` is at or after the last simulation year, it is ignored (with a log message) and all
+  years are solved. Otherwise it must be one of the simulation years. Defaults to `nothing`
+  (solve all years).
 """
 function run_hem(
     input_dir::AbstractString,
@@ -99,17 +149,21 @@ function run_hem(
     output_dir::Union{<:AbstractString, Nothing} = nothing,
     delta_t::Int = 4,
     year_start::Int = 2020,
+    end_year::Union{Int, Nothing} = nothing,
 )
     model_data = HEMData(input_dir;
         year_start=year_start,
         delta_t=delta_t,
         )
 
+    end_year = resolve_end_year(end_year, model_data)
+
     agents_and_opts = create_agents_and_opts(input_dir, model_data, agent_options, options)
 
     if isnothing(output_dir)
         output_dir = joinpath(input_dir, get_file_prefix(options, agents_and_opts))
     end
+    output_dir = end_year_output_dir(output_dir, end_year)
     
     if isdir(output_dir)
         if force
@@ -134,7 +188,8 @@ function run_hem(
             output_dir,
             max_iterations,
             window_length,
-            jump_model
+            jump_model,
+            end_year,
         )
     finally
         close(logger)
