@@ -90,6 +90,11 @@ validators = Dict(
                 check_symbol
             ])
         ),
+        FieldValidatorHasDefault(
+            "solver_threads",
+            value -> check_integer(value; min=1),
+            nothing
+        ),
     ],
     "HEMOptions" => [
         FieldValidatorBasic(

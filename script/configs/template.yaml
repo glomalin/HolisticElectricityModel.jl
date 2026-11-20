@@ -36,6 +36,10 @@ RunOptions:
 SimulationParameters:
   # CHOOSE ONE
   solver: "Xpress" # "Gurobi"
+  # Optional number of solver threads (Gurobi only). Set this to the number of CPUs allocated
+  # to the job (e.g. sbatch -n 10 -> 10) so that results do not depend on the node's core count.
+  # If not specified, the solver's default is used.
+  # solver_threads: 10
 
 # ------------------------------------------------------------------------------
 # Holistic Energy Model (HEM) model-wide options

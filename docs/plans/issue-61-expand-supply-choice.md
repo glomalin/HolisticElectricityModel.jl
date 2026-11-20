@@ -5,6 +5,7 @@ Working plan for https://github.com/glomalin/HolisticElectricityModel.jl/issues/
 ## Status
 - [x] Step 0: rename branch (from `eh/capture-supply-choice-in-run-name`) and commit this plan
 - [x] Step 1: `end_year` truncation option (tested in `test/test_end_year.jl`)
+- [x] Reproducible solves (Gurobi `Method = 4`, `solver_threads`)
 - [ ] Step 2: baselines (worktree `../HEM-baseline`, configs B1–B5, comparison script)
 - [ ] Step 3: pure refactor of CustomerGroup into dispatch-based DER-adoption / supply-choice steps (gate: B1–B5 unchanged)
 - [ ] Step 4.1: fix stale payback (CompeteDERConfigs)
@@ -13,12 +14,13 @@ Working plan for https://github.com/glomalin/HolisticElectricityModel.jl/issues/
 - [ ] Step 5: fail-fast validation of agent/option method coverage
 - [ ] Full-horizon reruns of MARKET-2.5 scenarios 3, 4, 7, 8 (confirm cluster time first)
 
-Open issue found during Step 1 (blocks Step 2): HEM runs are not reproducible. Two identical
-`end_year: 2022` runs of MARKET-2.5 scenario-5 (VIU) differed in dispatch/flow/price outputs and
-quantities derived from them (revenue requirement ~0.1%, x_DG up to 0.003 MW), while capacity
-(x_C, x_R) matched. Likely causes: Gurobi Threads/Method not pinned (it uses up to 32 threads
-on a 10-CPU allocation), and/or Symbol-keyed Dict/Set iteration order feeding model construction.
-Exact output comparisons for the refactor need this fixed first (or else aggregate comparisons).
+Reproducibility (found and fixed between Steps 1 and 2): identical runs used to differ because
+Gurobi's default LP method is a non-deterministic concurrent race (simplex vs barrier), which
+returned different optimal bases for the degenerate utility LP; prices and everything downstream
+followed. Fixed by `Method = 4` (deterministic concurrent) for all Gurobi optimizers plus
+`SimulationParameters.solver_threads` (use 10, matching `sbatch -n 10`). Verified: two identical
+`end_year: 2022` scenario-5 runs on different nodes matched in all 402 Gurobi fingerprints/objectives
+and all output files. Pre-fix full-horizon baselines must be rerun.
 Comparison tool: `/scratch/ehale/MARKET-2.5/scenarios/compare_results.jl` (env `compare_env`).
 
 Decisions already made: fix the latent bugs in separate commits after a refactor that leaves results unchanged; put the split-out logic in new sibling files rather than reorganizing customer_group.jl in place.

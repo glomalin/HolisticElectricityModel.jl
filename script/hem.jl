@@ -32,7 +32,8 @@ input_dir, year_start, delta_t = parse(
 
 
 # configure solver
-solver, = parse(config, "SimulationParameters", validators)
+solver, solver_threads = parse(config, "SimulationParameters", validators)
+set_solver_threads!(solver_threads)
 @info "Running on environment $(splitpath(Base.active_project())[end-1]) with solver $(solver)"
 import_solver_package(solver)
 
@@ -78,5 +79,6 @@ save_config(
     agent_options,
     resolved_output_dir;
     end_year=end_year,
+    solver_threads=solver_threads,
 )
 # ------------------------------------------------------------------------------

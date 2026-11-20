@@ -15,7 +15,7 @@ TEST_DIR = dirname(@__FILE__)
     config = YAML.load_file(joinpath(TEST_DIR, "data", "test_input_config.yaml"))
 
     input_dir, year_start, delta_t = parse(config, "DataSelection", validators, "input_path", "year_start", "delta_t")
-    solver, = parse(config, "SimulationParameters", validators)
+    solver, solver_threads = parse(config, "SimulationParameters", validators)
     market_structure, der_use_case, supply_choice_use_case,
     der_aggregation_use_case = parse(config, "HEMOptions", validators)
 

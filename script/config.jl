@@ -200,6 +200,7 @@ function save_config(
     agent_options::AgentOptionsStore,
     output_dir::AbstractString;
     end_year::Union{Int, Nothing} = nothing,
+    solver_threads::Union{Int, Nothing} = nothing,
 )
     config_file = joinpath(output_dir, "config.yaml")
     run_config = Dict{Any, Any}()
@@ -208,7 +209,10 @@ function save_config(
     if !isnothing(end_year)
         run_config["RunOptions"]["end_year"] = end_year
     end
-    run_config["SimulationParameters"] = Dict("solver" => "$(solver)")
+    run_config["SimulationParameters"] = Dict{String, Any}("solver" => "$(solver)")
+    if !isnothing(solver_threads)
+        run_config["SimulationParameters"]["solver_threads"] = solver_threads
+    end
     run_config["$(nameof(typeof(options)))"] = _get_dict_from_options(options)
     for (agent_type, agent_opts) in agent_options.data
         run_config["$(agent_type)"] = _get_dict_from_options(agent_opts)

@@ -91,6 +91,7 @@ export read_saved_result
 # Solvers
 export import_solver_package
 export get_optimizer_for_solver
+export set_solver_threads!
 export get_new_jump_model
 export addsolvers_ipp!
 
