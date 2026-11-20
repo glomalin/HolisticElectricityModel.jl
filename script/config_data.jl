@@ -76,6 +76,11 @@ validators = Dict(
             value -> check_string(value),
             nothing
         ),
+        FieldValidatorHasDefault(
+            "end_year",
+            value -> check_integer(value),
+            nothing
+        ),
     ],      
     "SimulationParameters" => [
         FieldValidatorBasic(

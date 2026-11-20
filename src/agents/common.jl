@@ -488,6 +488,10 @@ Arguments:
 - `max_iter::Int64`: Maximum number of iterations to solve the problem. Set in `run_hem`.
 - `window_length::Int64`: Length of the window for the simulation. Set in `run_hem`.
 - `jump_model::Any`: Jump model to use for the simulation. Iniitialized in `run_hem`.
+- `end_year::Union{Int, Nothing}`: If set, stop before solving any window that starts after
+  this year. Only the window loop is truncated, so results for years <= `end_year` match
+  those of a full run; later years keep their initialized values. Defaults to `nothing`
+  (run all years).
 """
 function solve_equilibrium_problem!(
     hem_opts::HEMOptions,
@@ -496,13 +500,19 @@ function solve_equilibrium_problem!(
     export_file_path::AbstractString,
     max_iter::Int64,
     window_length::Int64,
-    jump_model::Any
+    jump_model::Any,
+    end_year::Union{Int, Nothing} = nothing,
 )
     store = AgentStore(agents_and_opts)
     TimerOutputs.reset_timer!(HEM_TIMER)
 
     TimerOutputs.@timeit HEM_TIMER "solve_equilibrium_problem!" begin
         for w in 1:(length(model_data.index_y_fix)-window_length+1) # loop over windows
+            window_start_year = model_data.year(model_data.index_y_fix.elements[w])
+            if !isnothing(end_year) && window_start_year > end_year
+                @warn "Truncating run: skipping windows starting in $(Int(window_start_year)) and later (end_year = $end_year). Results for later years are initial values only."
+                break
+            end
             model_data.index_y.elements =
                 model_data.index_y_fix.elements[w:(w+window_length-1)]
             i = 0
