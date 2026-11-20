@@ -575,9 +575,19 @@ function select_der_config!(
     NetProfit_pv_stor, NetProfit_PV_only,
     model_data::HEMData, reg_year, z::Symbol, h::Symbol,
 )
-    if (NetProfit_pv_stor(z, h) > 0.0) && (NetProfit_PV_only(z, h) > 0.0)
+    # A configuration is attractive if it has positive net profit; only then is its payback
+    # period defined. Compute paybacks before choosing so the chosen branch never uses a
+    # payback left over from an earlier iteration or year.
+    pv_stor_attractive = NetProfit_pv_stor(z, h) > 0.0
+    pv_only_attractive = NetProfit_PV_only(z, h) > 0.0
+    if pv_stor_attractive
         customers.Payback_pv_stor(z, h, :) .= payback_pv_stor(customers, NetProfit_pv_stor(z, h), z, h)
+    end
+    if pv_only_attractive
         customers.Payback_pv_only(z, h, :) .= payback_pv_only(customers, NetProfit_PV_only(z, h), z, h)
+    end
+
+    if pv_stor_attractive && pv_only_attractive
         if customers.Payback_pv_stor(z, h) <= customers.Payback_pv_only(z, h)
             # Solar plus storage is most attractive
             adopt_pv_stor!(customers, customers.Payback_pv_stor, model_data, reg_year, z, h)
@@ -585,14 +595,11 @@ function select_der_config!(
             # Standalone PV is most attractive
             adopt_pv_only!(customers, customers.Payback_pv_only, model_data, reg_year, z, h)
         end
-    elseif (NetProfit_pv_stor(z, h) < 0.0) && (NetProfit_PV_only(z, h) > 0.0)
+    elseif pv_only_attractive
         # Only Standalone PV is attractive
-        # NOTE: Payback_pv_only is not recomputed here, so it holds whatever value was last set
-        # for (z, h) (see plan Step 4.1).
         adopt_pv_only!(customers, customers.Payback_pv_only, model_data, reg_year, z, h)
-    elseif (NetProfit_pv_stor(z, h) > 0.0) && (NetProfit_PV_only(z, h) < 0.0)
+    elseif pv_stor_attractive
         # Only Solar plus Storage is attractive
-        # NOTE: Payback_pv_stor is not recomputed here either (see plan Step 4.1).
         adopt_pv_stor!(customers, customers.Payback_pv_stor, model_data, reg_year, z, h)
     else
         adopt_nothing!(customers, model_data, reg_year, z, h)
