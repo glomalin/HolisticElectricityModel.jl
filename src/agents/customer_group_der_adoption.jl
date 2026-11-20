@@ -147,9 +147,14 @@ function choose_der_builds!(
         end
     end
 
-    for (z, h) in model_data.index_z_h_map, m in customers.index_m
-        customers.x_DG_new_my(reg_year_index, h, z, m, :) .= customers.x_DG_new(h, z, m)
-        customers.MaxDG_my(reg_year_index, z, h, m, :) .= customers.MaxDG(z, h, m)
+    for (z, h) in model_data.index_z_h_map
+        for m in customers.index_m
+            customers.x_DG_new_my(reg_year_index, h, z, m, :) .= customers.x_DG_new(h, z, m)
+            customers.MaxDG_my(reg_year_index, z, h, m, :) .= customers.MaxDG(z, h, m)
+            # cumulative capacity, read by the bulk system agents (e.g., the VIU utility)
+            update_total_capacity!(customers.total_der_capacity_my, customers.x_DG_new, model_data, reg_year, z, h, m)
+        end
+        update_total_capacity_pv_only_builds!(customers, model_data, reg_year, z, h)
     end
 end
 

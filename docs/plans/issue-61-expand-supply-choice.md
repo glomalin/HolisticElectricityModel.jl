@@ -11,7 +11,7 @@ Working plan for https://github.com/glomalin/HolisticElectricityModel.jl/issues/
 - [x] Step 4.1: fix stale payback (CompeteDERConfigs). No change in VIU scenarios 5 and 6 through 2023 (the one-config-attractive branches were not reached)
 - [x] Step 4.2: fix WholesaleMarketPerc dispatch. VIU + DERAdoption + SupplyChoice previously got the WM value (1.0); now 0.01 like VIU + SupplyChoice. Green subscriptions and green-tech buildout drop ~47% in VIU scenario-7 and B4 (2021-2023), with knock-on changes in prices/dispatch/capacity; VIU SupplyChoice-only (B5) unchanged
 - [x] Step 4.3: fix x_green_sub save dims (x_DG fixed by the Step 3 refactor). Output-only: x_green_sub.csv gains Zone; values unchanged
-- [ ] Step 4.4: StandalonePVOnly path never updates total_der_capacity_my / total_pv_only_capacity_my, which the VIU utility reads (so the utility never sees new standalone-PV builds)
+- [x] Step 4.4: StandalonePVOnly path never updated total_der_capacity_my / total_pv_only_capacity_my, which the VIU utility reads. Fixed; in B4 (VIU StandalonePVOnly + SupplyChoice) cumulative DER seen by the utility rises 25/44/83% in 2021/22/23, revenue requirement falls 2.1/3.4% and emissions 4.3/10.5% in 2022/23
 - [ ] Step 5: fail-fast validation of agent/option method coverage
 - [ ] Full-horizon reruns of MARKET-2.5 scenarios 3, 4, 7, 8 (confirm cluster time first)
 
