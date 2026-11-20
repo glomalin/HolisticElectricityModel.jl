@@ -475,6 +475,36 @@ function save_results(
 end
 
 """
+Check that every agent in `store` has a `solve_agent_problem!` method for its options and
+`hem_opts`, using the argument types `solve_equilibrium_problem!` will call it with. Throws
+one error listing every agent/option combination without a method.
+"""
+function check_agent_methods(
+    hem_opts::HEMOptions,
+    model_data::HEMData,
+    store::AgentStore,
+    window_length::Integer,
+    jump_model,
+    export_file_path::AbstractString,
+)
+    missing_methods = String[]
+    for (agent, options) in iter_agents_and_options(store)
+        argtypes = Tuple{
+            typeof(agent), typeof(options), typeof(model_data), typeof(hem_opts), typeof(store),
+            Int, typeof(window_length), typeof(jump_model), typeof(export_file_path), Bool, Bool,
+        }
+        if !hasmethod(solve_agent_problem!, argtypes)
+            push!(missing_methods, "$(nameof(typeof(agent))) with $(options) under $(hem_opts)")
+        end
+    end
+    if !isempty(missing_methods)
+        error("Unsupported combination of options: no solve_agent_problem! method for\n  " *
+              join(missing_methods, "\n  "))
+    end
+    return
+end
+
+"""
 Main function to run the HEM model.
 It loops over the simulation years and calls the `solve_agent_problem!` method and the 
 `save_results` method for each agent.
@@ -489,9 +519,13 @@ Arguments:
 - `window_length::Int64`: Length of the window for the simulation. Set in `run_hem`.
 - `jump_model::Any`: Jump model to use for the simulation. Iniitialized in `run_hem`.
 - `end_year::Union{Int, Nothing}`: If set, stop before solving any window that starts after
-  this year. Only the window loop is truncated, so results for years <= `end_year` match
-  those of a full run; later years keep their initialized values. Defaults to `nothing`
-  (run all years).
+  this year. Only the window loop is truncated, so results for years <= `end_year` are
+  computed the same way as in a full run; later years keep their initialized values.
+  Defaults to `nothing` (run all years).
+
+Before solving, checks that every agent has a `solve_agent_problem!` method for the given
+options (see `check_agent_methods`), so an unsupported combination of options fails
+immediately instead of partway through the first year.
 """
 function solve_equilibrium_problem!(
     hem_opts::HEMOptions,
@@ -504,6 +538,7 @@ function solve_equilibrium_problem!(
     end_year::Union{Int, Nothing} = nothing,
 )
     store = AgentStore(agents_and_opts)
+    check_agent_methods(hem_opts, model_data, store, window_length, jump_model, export_file_path)
     TimerOutputs.reset_timer!(HEM_TIMER)
 
     TimerOutputs.@timeit HEM_TIMER "solve_equilibrium_problem!" begin

@@ -12,8 +12,11 @@ Working plan for https://github.com/glomalin/HolisticElectricityModel.jl/issues/
 - [x] Step 4.2: fix WholesaleMarketPerc dispatch. VIU + DERAdoption + SupplyChoice previously got the WM value (1.0); now 0.01 like VIU + SupplyChoice. Green subscriptions and green-tech buildout drop ~47% in VIU scenario-7 and B4 (2021-2023), with knock-on changes in prices/dispatch/capacity; VIU SupplyChoice-only (B5) unchanged
 - [x] Step 4.3: fix x_green_sub save dims (x_DG fixed by the Step 3 refactor). Output-only: x_green_sub.csv gains Zone; values unchanged
 - [x] Step 4.4: StandalonePVOnly path never updated total_der_capacity_my / total_pv_only_capacity_my, which the VIU utility reads. Fixed; in B4 (VIU StandalonePVOnly + SupplyChoice) cumulative DER seen by the utility rises 25/44/83% in 2021/22/23, revenue requirement falls 2.1/3.4% and emissions 4.3/10.5% in 2022/23
-- [ ] Step 5: fail-fast validation of agent/option method coverage
-- [ ] Full-horizon reruns of MARKET-2.5 scenarios 3, 4, 7, 8 (confirm cluster time first)
+- [x] Step 5: fail-fast validation of agent/option method coverage (`check_agent_methods`, called at the start of `solve_equilibrium_problem!`; `test/test_agent_methods.jl`). Real agents from MARKET-2.5 scenarios 1/3/5/7 and B3-B5 pass
+- [ ] R-B2 comparison (WM refactor equivalence): compare `Results_bench_B2_refactor_thru2023` against the WM scenario-1 `_thru2027` run (years <= 2023) once that run finishes
+- [ ] Full-horizon reruns of MARKET-2.5 scenarios 7, 8 (VIU) via `scenarios/run-baseline.sh` (worktree moved to the Step 5 commit), then 3, 4 (WM, `end_year: 2027` because of the 2028 IPP MPPDC infeasibility)
+- [ ] Clean up benchmark result dirs and the `HEM-baseline` worktree after R-B2; decide whether to commit MARKET-2.5 changes (solver_threads, `--threads`, compare_results.jl, run-baseline.sh, README)
+- [ ] Separate follow-up: IPP MPPDC upper level INFEASIBLE_OR_UNBOUNDED in 2028 for WM scenario-1/2 (`iis_model_2028.txt`)
 
 Reproducibility (found and fixed between Steps 1 and 2): identical runs used to differ because
 Gurobi's default LP method is a non-deterministic concurrent race (simplex vs barrier), which
