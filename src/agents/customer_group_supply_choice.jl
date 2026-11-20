@@ -153,7 +153,7 @@ function save_supply_choice_results(
 )
     save_param(
         customers.x_green_sub_my.values,
-        [:Year, :CustomerType],
+        [:Year, :CustomerType, :Zone],
         :Subscription_MWh,
         joinpath(export_file_path, "x_green_sub.csv"),
     )
