@@ -6,11 +6,12 @@ Working plan for https://github.com/glomalin/HolisticElectricityModel.jl/issues/
 - [x] Step 0: rename branch (from `eh/capture-supply-choice-in-run-name`) and commit this plan
 - [x] Step 1: `end_year` truncation option (tested in `test/test_end_year.jl`)
 - [x] Reproducible solves (Gurobi `Method = 4`, `solver_threads`)
-- [ ] Step 2: baselines (worktree `../HEM-baseline`, configs B1–B5, comparison script)
-- [ ] Step 3: pure refactor of CustomerGroup into dispatch-based DER-adoption / supply-choice steps (gate: B1–B5 unchanged)
+- [x] Step 2: baselines (worktree `/scratch/ehale/HEM-baseline` at cbedeaf, `scenarios/run-baseline.sh`, configs in `scenarios/configs-bench/`). B1 = full VIU scenario-5 run, B2 = WM scenario-1 `_thru2027` run, B3–B5 = `Results_bench_B*_baseline_thru2023`
+- [x] Step 3: refactor of CustomerGroup into dispatch-based DER-adoption / supply-choice steps. Gate: B1, B3, B5 all files match; B4 matches except intended output-format changes (extra DER files; x_DG.csv now has Zone, and its old DERTech column actually held zone names). #61 combos (scenario-7, SolarPlusStorageOnly+SupplyChoice, VIU) now run. WM gate (R-B2) and WM #61 (scenario-3) pending. A no-decision CustomerGroup (NullUseCase/NullUseCase) now only updates annual load data and returns 0.0.
 - [ ] Step 4.1: fix stale payback (CompeteDERConfigs)
 - [ ] Step 4.2: fix WholesaleMarketPerc dispatch
-- [ ] Step 4.3: fix x_DG / x_green_sub save dims
+- [ ] Step 4.3: fix x_green_sub save dims (x_DG fixed by the Step 3 refactor)
+- [ ] Step 4.4: StandalonePVOnly path never updates total_der_capacity_my / total_pv_only_capacity_my, which the VIU utility reads (so the utility never sees new standalone-PV builds)
 - [ ] Step 5: fail-fast validation of agent/option method coverage
 - [ ] Full-horizon reruns of MARKET-2.5 scenarios 3, 4, 7, 8 (confirm cluster time first)
 
