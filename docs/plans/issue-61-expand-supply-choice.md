@@ -9,7 +9,7 @@ Working plan for https://github.com/glomalin/HolisticElectricityModel.jl/issues/
 - [x] Step 2: baselines (worktree `/scratch/ehale/HEM-baseline` at cbedeaf, `scenarios/run-baseline.sh`, configs in `scenarios/configs-bench/`). B1 = full VIU scenario-5 run, B2 = WM scenario-1 `_thru2027` run, B3–B5 = `Results_bench_B*_baseline_thru2023`
 - [x] Step 3: refactor of CustomerGroup into dispatch-based DER-adoption / supply-choice steps. Gate: B1, B3, B5 all files match; B4 matches except intended output-format changes (extra DER files; x_DG.csv now has Zone, and its old DERTech column actually held zone names). #61 combos (scenario-7, SolarPlusStorageOnly+SupplyChoice, VIU) now run. WM gate (R-B2) and WM #61 (scenario-3) pending. A no-decision CustomerGroup (NullUseCase/NullUseCase) now only updates annual load data and returns 0.0.
 - [x] Step 4.1: fix stale payback (CompeteDERConfigs). No change in VIU scenarios 5 and 6 through 2023 (the one-config-attractive branches were not reached)
-- [ ] Step 4.2: fix WholesaleMarketPerc dispatch
+- [x] Step 4.2: fix WholesaleMarketPerc dispatch. VIU + DERAdoption + SupplyChoice previously got the WM value (1.0); now 0.01 like VIU + SupplyChoice. Green subscriptions and green-tech buildout drop ~47% in VIU scenario-7 and B4 (2021-2023), with knock-on changes in prices/dispatch/capacity; VIU SupplyChoice-only (B5) unchanged
 - [ ] Step 4.3: fix x_green_sub save dims (x_DG fixed by the Step 3 refactor)
 - [ ] Step 4.4: StandalonePVOnly path never updates total_der_capacity_my / total_pv_only_capacity_my, which the VIU utility reads (so the utility never sees new standalone-PV builds)
 - [ ] Step 5: fail-fast validation of agent/option method coverage

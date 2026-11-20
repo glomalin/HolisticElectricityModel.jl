@@ -44,6 +44,15 @@ function solve_supply_choice!(
     return [(x_green_sub_before, GreenSubMWh)]
 end
 
+"""
+Share of the bulk power system served through a wholesale market, as used by the green
+tariff subscription regression: (nearly) none for a vertically integrated utility (0.01
+rather than 0 so that the regression's log term is defined) and all of it in a wholesale
+market.
+"""
+get_wholesale_market_perc(::HEMOptions{VIU}) = 0.01
+get_wholesale_market_perc(::HEMOptions{WM}) = 1.0
+
 function get_green_tech_subscription(
     customers::CustomerGroup,
     green_developer,
@@ -56,11 +65,7 @@ function get_green_tech_subscription(
     green_sub_model = customers.green_sub_model
     delta_t = model_data.delta_t.value
 
-    if hem_opts isa HEMOptions{VIU, NullUseCase, SupplyChoice, <:UseCase}
-        WholesaleMarketPerc = 0.01
-    else
-        WholesaleMarketPerc = 1.0
-    end
+    WholesaleMarketPerc = get_wholesale_market_perc(hem_opts)
 
     reg_year, reg_year_index = get_reg_year(model_data)
 
